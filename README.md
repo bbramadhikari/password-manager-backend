@@ -1,6 +1,4 @@
-Here is a **README.md** file that includes setup instructions, API details, and authentication process.
 
----
 
 ### 📌 **README.md (Backend)**
 ```md

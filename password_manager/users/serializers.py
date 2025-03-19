@@ -1,10 +1,12 @@
 from rest_framework import serializers
-from .models import CustomUser
+from .models import CustomUser, Password
 
 
 class UserSignupSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
-    face_image = serializers.CharField(write_only=True, required=False)
+    face_image = serializers.CharField(
+        write_only=True
+    )  # Assuming face image is a base64 string or file
 
     class Meta:
         model = CustomUser
@@ -25,7 +27,7 @@ class UserSignupSerializer(serializers.ModelSerializer):
         validated_data["email"] = validated_data["email"].strip().lower()
 
         user = CustomUser(**validated_data)
-        user.set_password(password)  # Hash password
+        user.set_password(password)  # Hash the password before saving
         user.save()
 
         if face_image:
@@ -37,4 +39,18 @@ class UserSignupSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ["id", "username", "email"]
+        fields = [
+            "id",
+            "username",
+            "email",
+        ]  # Include only the fields needed for user details
+
+
+class PasswordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Password
+        fields = [
+            "domain_name",
+            "password",
+            "link",
+        ]  # Fields for storing passwords and associated info

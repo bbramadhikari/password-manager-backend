@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "users",
+    "django_extensions",
 ]
 
 # ✅ Middleware
@@ -114,8 +115,8 @@ REST_FRAMEWORK = {
 CORS_ALLOW_CREDENTIALS = True  # Allow cookies & auth headers
 CORS_ALLOW_ALL_ORIGINS = False  # Disable unrestricted access
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3001",  # Your frontend URL
-    "http://127.0.0.1:3001",
+    "http://localhost:3000",  # Your frontend URL
+    "http://127.0.0.1:3000",
 ]
 
 CORS_ALLOW_METHODS = [  # Allow these HTTP methods

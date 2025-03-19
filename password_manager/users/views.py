@@ -4,8 +4,10 @@ from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserSignupSerializer, UserSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.decorators import api_view, permission_classes
+from .serializers import UserSignupSerializer, UserSerializer, PasswordSerializer
+from .models import Password
 
 User = get_user_model()  # Get custom user model
 
@@ -75,29 +77,19 @@ class LoginView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Debugging: Log user search
-        print(f"🔹 Checking for user with email: {email}")
-
         try:
             user = User.objects.get(
                 email__iexact=email
-            )  # ✅ Case-insensitive email lookup
+            )  # Case-insensitive email lookup
         except User.DoesNotExist:
-            print(f"❌ Login Failed: User with email '{email}' not found.")
             return Response(
                 {"error": "Invalid credentials!"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        print(f"✅ User Found: '{user.email}' (ID: {user.id})")
-
-        # Verify hashed password
-        if not check_password(password, user.password):
-            print(f"❌ Login Failed: Incorrect password for '{user.email}'")
+        if not check_password(password, user.password):  # Verify the hashed password
             return Response(
                 {"error": "Invalid credentials!"}, status=status.HTTP_400_BAD_REQUEST
             )
-
-        print("✅ Password verified successfully!")
 
         # Generate JWT Token
         refresh = RefreshToken.for_user(user)
@@ -124,13 +116,37 @@ class UserDetailView(APIView):
 
     def get(self, request):
         user = request.user
-        print(f"📡 API Called by: {user}")  # ✅ Log user request
-        print(f"🔹 Authenticated: {user.is_authenticated}")
-
-        if not user.is_authenticated:
-            return Response(
-                {"error": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED
-            )
-
         serializer = UserSerializer(user)
         return Response(serializer.data)
+
+
+# ✅ Add Password API (Allow authenticated users to add a password)
+@api_view(["POST"])
+@permission_classes(
+    [IsAuthenticated]
+)  # Ensure only authenticated users can add passwords
+def add_password(request):
+    """Allow authenticated users to add a password."""
+    serializer = PasswordSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save(user=request.user)  # Save password for authenticated user
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ✅ Root API (Provide basic API info)
+@api_view(["GET"])
+@permission_classes([AllowAny])  # No authentication required for this view
+def api_root(request):
+    return Response(
+        {
+            "message": "Welcome to the API!",
+            "endpoints": {
+                "users": "/api/users/",
+                "signup": "/api/signup/",
+                "login": "/api/login/",
+                "me": "/api/me/",
+                "passwords": "/api/passwords/",
+            },
+        }
+    )

@@ -17,11 +17,17 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from . import views
+from users.views import api_root  # Import the api_root view
+from . import views  # Import home view
+from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("admin/", admin.site.urls),  # Admin panel route
+    # Root endpoint for the API (provides information about available endpoints)
+    path("api/", api_root, name="api_root"),
+    # User-specific API routes (signup, login, passwords, etc.)
     path("api/users/", include("users.urls")),
-    path("", include("users.urls")),
-    path("", views.home),
+    # Home route (for your non-API view)
+    path("", views.home, name="home"),
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 ]

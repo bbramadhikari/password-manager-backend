@@ -95,7 +95,7 @@ USE_I18N = True
 USE_TZ = True
 
 # ✅ Static Files
-STATIC_URL = "/static/"
+STATIC_URL = "/assets/"
 
 # ✅ Default Primary Key Type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -135,3 +135,16 @@ CORS_ALLOW_HEADERS = [  # Allow these headers
     "Origin",
     "X-Requested-With",
 ]
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        hours=24
+    ),  # Set access token expiration time to 24 hours
+    "REFRESH_TOKEN_LIFETIME": timedelta(
+        days=7
+    ),  # Optional: Set refresh token expiration time (default is 7 days)
+    "ROTATE_REFRESH_TOKENS": False,  # Optional: Configure whether to rotate refresh tokens
+    "BLACKLIST_AFTER_ROTATION": True,  # Optional: Configure whether to blacklist the refresh token after rotation
+}

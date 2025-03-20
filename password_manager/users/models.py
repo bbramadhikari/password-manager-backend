@@ -56,6 +56,8 @@ class CustomUser(AbstractUser):
                 gray_img, scaleFactor=1.3, minNeighbors=6, minSize=(30, 30)
             )
 
+            print("faces", faces)
+
             if len(faces) == 0:
                 raise ValueError("⚠️ No face detected!")
 
@@ -65,8 +67,10 @@ class CustomUser(AbstractUser):
             face_resized = cv2.resize(face_crop, (100, 100))
 
             # Save the cropped face image
-            face_filename = f"face_{self.username}.png"
-            cv2.imwrite(f"media/faces/{face_filename}", face_resized)
+            cropped_face = f"face_{self.username}.png"
+            face_filename = f"faces/{face_filename}"
+            print("face_filename", face_filename)
+            cv2.imwrite(face_filename, face_resized)
 
             return face_filename  # Return the file path of the saved image
 
@@ -75,13 +79,15 @@ class CustomUser(AbstractUser):
             return None
 
     def save_face_image(self, image_data):
+        # print("models ....", image_data)
         """Process and save the face image."""
         if not self.pk:
             self.save()  # Ensure user exists before saving image
 
-        processed_image_path = self.process_face_image(image_data)
-        if processed_image_path:
-            self.face_image = processed_image_path
+        # processed_image_path = self.process_face_image(image_data)
+        # print(" from below models...", processed_image_path)
+        if image_data:
+            self.face_image = image_data
             self.save(update_fields=["face_image"])
             print(f"✅ Face image saved successfully: {self.face_image}")
         else:

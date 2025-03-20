@@ -43,6 +43,7 @@ class UserSerializer(serializers.ModelSerializer):
             "id",
             "username",
             "email",
+            "face_image",
         ]  # Include only the fields needed for user details
 
 

@@ -52,17 +52,6 @@ class SignupView(APIView):
 
             user = serializer.save()
 
-            face_image = request.data.get("face_image")
-            if face_image:
-                try:
-                    user.save_face_image(face_image)  # ✅ Securely store face image
-                except Exception as e:
-                    print(f"⚠️ Face image processing error: {e}")
-                    return Response(
-                        {"error": "Invalid face image data."},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-
             refresh = RefreshToken.for_user(user)
 
             return Response(
@@ -314,6 +303,7 @@ class ImageUploadView(APIView):
     def post(self, request, *args, **kwargs):
         # Ensure the request includes the image file
         user = request.user
+        print(request.FILES)
 
         if "image" not in request.FILES:
             return Response(
@@ -346,6 +336,8 @@ class ImageListView(APIView):
     def get(self, request, *args, **kwargs):
         user = request.user
         image = Image.objects.get(user=user)
+        if not image:
+            return Response({"status": False, status: 404})
         serializer = ImageSerializer(image)
         return Response(serializer.data)
 

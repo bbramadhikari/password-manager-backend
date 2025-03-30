@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 import cv2
@@ -6,6 +7,7 @@ import base64
 import hashlib
 import re
 from django.contrib.auth.hashers import make_password
+import pyotp  # For OTP generation
 
 
 # Load Haar Cascade for face detection
@@ -13,92 +15,67 @@ CASCADE_PATH = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
 face_cascade = cv2.CascadeClassifier(CASCADE_PATH)
 
 
+# Save Face Image
+def image_upload_to(instance, filename):
+    # Create a custom filename with the current date and time
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    lowercase_filename = filename.lower()
+    return f"images/{timestamp}_{lowercase_filename}"
+
+
+class Image(models.Model):
+    user = models.ForeignKey(
+        "CustomUser",
+        on_delete=models.CASCADE,
+        related_name="image",
+    )
+    image = models.ImageField(upload_to=image_upload_to)  # Store the actual image
+    image_url = models.CharField(
+        max_length=255, blank=True, null=True
+    )  # Store the URL (optional)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = "users"
+
+    def save(self, *args, **kwargs):
+        if not self.image_url and self.image:
+            self.image_url = self.image.url  # Set image_url to the image URL
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Image {self.id}"
+
+
 class CustomUser(AbstractUser):
     phone = models.CharField(max_length=15, unique=True)
-    face_image = models.ImageField(upload_to="faces/", null=True, blank=True)
+    face_image = models.OneToOneField(
+        "Image",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="user_face_image",
+    )
+    otp_secret = models.CharField(max_length=255, blank=True, null=True)
 
-    def process_face_image(self, image_data):
-        """Process the face image to extract and save the face using OpenCV."""
-        try:
-            print(f"🔹 Received face image data: {image_data[:50]}...")
+    # OTP related methods
+    def generate_otp_secret(self):
+        """Generate a secret key for OTP if not already generated."""
+        if not self.otp_secret:
+            totp = pyotp.random_base32()  # Generate a new secret key for OTP
+            self.otp_secret = totp
+            self.save()
+        return self.otp_secret
 
-            # Ensure the Base64 string has correct padding
-            image_data = self.ensure_base64_padding(image_data)
+    def get_otp(self):
+        """Generate OTP using the stored OTP secret."""
+        totp = pyotp.TOTP(self.otp_secret)
+        return totp.now()  # Get current OTP
 
-            # Remove the base64 image header if it exists
-            image_data = re.sub(r"^data:image/[^;]+;base64,", "", image_data)
-
-            if not image_data:
-                raise ValueError("⚠️ Invalid image data (empty or malformed).")
-
-            # Decode Base64 image
-            image_bytes = base64.b64decode(image_data)
-            np_arr = np.frombuffer(image_bytes, np.uint8)
-
-            # Attempt to decode the image
-            img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-
-            if img is None:
-                raise ValueError("⚠️ Failed to decode image data.")
-
-            print(f"🔹 Image decoded successfully, shape: {img.shape}")
-
-            # Convert to grayscale
-            gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-            # Load Haar Cascade for face detection
-            face_cascade = cv2.CascadeClassifier(
-                cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
-            )
-
-            # Try to detect faces in the image with adjusted parameters
-            faces = face_cascade.detectMultiScale(
-                gray_img, scaleFactor=1.3, minNeighbors=6, minSize=(30, 30)
-            )
-
-            print("faces", faces)
-
-            if len(faces) == 0:
-                raise ValueError("⚠️ No face detected!")
-
-            # Extract the first face detected
-            x, y, w, h = faces[0]
-            face_crop = img[y : y + h, x : x + w]
-            face_resized = cv2.resize(face_crop, (100, 100))
-
-            # Save the cropped face image
-            cropped_face = f"face_{self.username}.png"
-            face_filename = f"faces/{face_filename}"
-            print("face_filename", face_filename)
-            cv2.imwrite(face_filename, face_resized)
-
-            return face_filename  # Return the file path of the saved image
-
-        except Exception as e:
-            print(f"⚠️ Error processing face image: {e}")
-            return None
-
-    def save_face_image(self, image_data):
-        # print("models ....", image_data)
-        """Process and save the face image."""
-        if not self.pk:
-            self.save()  # Ensure user exists before saving image
-
-        # processed_image_path = self.process_face_image(image_data)
-        # print(" from below models...", processed_image_path)
-        if image_data:
-            self.face_image = image_data
-            self.save(update_fields=["face_image"])
-            print(f"✅ Face image saved successfully: {self.face_image}")
-        else:
-            print("❌ Failed to save face image.")
-
-    def ensure_base64_padding(self, base64_string):
-        """Ensure the Base64 string has correct padding."""
-        padding_needed = len(base64_string) % 4
-        if padding_needed:
-            base64_string += "=" * (4 - padding_needed)  # Add necessary padding
-        return base64_string
+    def verify_otp(self, otp):
+        """Verify if the OTP provided is correct."""
+        totp = pyotp.TOTP(self.otp_secret)
+        return totp.verify(otp)  # Returns True if OTP is valid, False otherwise
 
 
 class Password(models.Model):

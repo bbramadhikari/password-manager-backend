@@ -96,6 +96,10 @@ USE_TZ = True
 
 # ✅ Static Files
 STATIC_URL = "/assets/"
+# IMAGE UPLOAD DIR
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
 
 # ✅ Default Primary Key Type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -148,3 +152,19 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": False,  # Optional: Configure whether to rotate refresh tokens
     "BLACKLIST_AFTER_ROTATION": True,  # Optional: Configure whether to blacklist the refresh token after rotation
 }
+
+
+# settings.py
+
+# Email settings for sending emails through Gmail SMTP server
+EMAIL_BACKEND = (
+    "django.core.mail.backends.smtp.EmailBackend"  # Use SMTP for sending emails
+)
+EMAIL_HOST = "smtp.gmail.com"  # Gmail's SMTP server
+EMAIL_PORT = 587  # Port for sending emails over TLS
+EMAIL_USE_TLS = True  # Enable TLS for encryption during email transmission
+EMAIL_HOST_USER = "bbramadhikari@gmail.com"  # Your Gmail address
+EMAIL_HOST_PASSWORD = (
+    "sjbu texf yxtp fuve"  # Your Gmail password or app-specific password
+)
+DEFAULT_FROM_EMAIL = "bbramadhikari@gmail.com"  # The sender email address

@@ -55,3 +55,21 @@ class PasswordSerializer(serializers.ModelSerializer):
             "password",
             "link",
         ]  # Fields for storing passwords and associated info
+
+
+class ImageUploadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = [
+            "face_image",
+        ]
+
+
+from .models import Image
+
+
+class ImageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Image
+        fields = ["id", "image", "user"]

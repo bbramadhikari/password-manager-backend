@@ -1,28 +1,50 @@
-# Core Django & REST Framework
-Django>=4.2
-djangorestframework>=3.14.0
-django-environ>=0.10.0
-djangorestframework-simplejwt>=5.2.2
 
-# Database (PostgreSQL or SQLite)
-psycopg2-binary>=2.9.5  # Required for PostgreSQL
-sqlite3  # Default for local testing
+# Django and Related Packages (Core Framework)
+Django==5.1.7                 # The main Django framework for building web applications
+djangorestframework==3.15.2   # Django REST framework for building RESTful APIs
+djangorestframework-simplejwt==5.5.0 # JWT authentication for Django REST Framework
+django-cors-headers==4.7.0    # Handling Cross-Origin Resource Sharing (CORS)
+django-extensions==3.2.3      # Useful tools for developing Django projects
 
-# Face Recognition & Image Processing
-opencv-python>=4.8.0.76
-face-recognition>=1.3.0
-numpy>=1.23.5
-pillow>=9.4.0
+# Face Recognition and Image Processing Packages
+dlib==19.24.6                 # Machine learning toolkit used for face recognition
+face-recognition==1.3.0       # Library for detecting and recognizing faces
+face-recognition-models==0.3.0 # Pre-trained face recognition models
+opencv-python==4.11.0.86      # Library for computer vision (used for video processing)
+mtcnn==1.0.0                  # Multi-task Cascaded Convolutional Neural Networks (used for face detection)
+torch==2.6.0                  # PyTorch: Deep learning framework (used with face recognition)
+torchvision==0.21.0           # PyTorch's computer vision library
 
-# Cryptography & Security
-cryptography>=42.0.0
-argon2-cffi>=21.3.0  # Secure password hashing
+# Database Connectivity and ORM
+psycopg2==2.9.10              # PostgreSQL database adapter for Python
+psycopg2-binary==2.9.10       # Precompiled binary package of psycopg2 (easier installation)
+sqlparse==0.5.3               # SQL parsing library used by Django's ORM
 
-# CORS & Permissions
-django-cors-headers>=4.0.0
-django-filter>=23.2
+# Authentication, Security & Token Generation
+PyJWT==2.9.0                  # JSON Web Token implementation in Python (used by SimpleJWT)
+pyotp==2.9.0                  # Library for generating and verifying OTPs (used for 2FA)
 
-# Development & Debugging
-black>=23.1.0  # Code formatting
-flake8>=6.1.0  # Linting
-pytest-django>=4.5.2  # Testing
+# General Utilities & Dependencies
+python-dotenv==1.1.0          # For loading environment variables from .env files
+Jinja2==3.1.6                 # Template engine for rendering HTML (used in Django templates)
+MarkupSafe==3.0.2             # HTML string handling library used by Jinja2
+joblib==1.4.2                 # Library for saving and loading machine learning models
+click==8.1.8                  # Command-line interface building tool
+fsspec==2025.3.0              # File system specification (for handling various file systems)
+lz4==4.4.3                    # Compression library for faster data transfer and storage
+mpmath==1.3.0                 # Library for arbitrary-precision arithmetic (used with SymPy)
+sympy==1.13.1                 # Library for symbolic mathematics
+networkx==3.4.2               # Library for creating and analyzing graphs and networks
+filelock==3.18.0              # Library for file locking (used in managing file access)
+typing-extensions==4.12.2     # Backport of Python 3.9+ standard library typing features
+
+# Image Processing and Utilities
+pillow==11.1.0                # Image processing library (PIL fork)
+
+# Environment & Deployment
+asgiref==3.8.1                # Required for running Django with ASGI (Async Server Gateway Interface)
+tzdata==2025.1                # Timezone data for timezone-aware date and time handling
+
+# Package Management
+pip==25.0.1                   # Python package installer
+setuptools==76.1.0            # Library for packaging Python projects

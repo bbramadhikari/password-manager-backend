@@ -19,19 +19,28 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
-from users.views import api_root  # Import the api_root view
+from users.views import ApiRootView
 from . import views  # Import home view
 from rest_framework_simplejwt.views import TokenRefreshView
+
+
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()  # Initialize router
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),  # Admin panel route
     # Root endpoint for the API (provides information about available endpoints)
-    path("api/", api_root, name="api_root"),
+    path("api/", ApiRootView.as_view(), name="api_root"),
     # User-specific API routes (signup, login, passwords, etc.)
     path("api/users/", include("users.urls")),
     # Home route (for your non-API view)
     path("", views.home, name="home"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path(
+        "", include(router.urls)
+    ),  # Automatically lists all registered APIs from viewsets
 ]
 
 

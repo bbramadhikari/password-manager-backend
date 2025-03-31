@@ -1,13 +1,15 @@
 from datetime import datetime
-from django.contrib.auth.models import AbstractUser
-from django.db import models
-import cv2
 import numpy as np
+
+import cv2
+import re
+import pyotp  # For OTP generation
 import base64
 import hashlib
-import re
+
+from django.db import models
+from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.hashers import make_password
-import pyotp  # For OTP generation
 
 
 # Load Haar Cascade for face detection
@@ -61,7 +63,7 @@ class CustomUser(AbstractUser):
 
     # OTP related methods
     def generate_otp_secret(self):
-        """Generate a secret key for OTP if not already generated."""
+        # Generate a secret key for OTP if not already generated.
         if not self.otp_secret:
             totp = pyotp.random_base32()  # Generate a new secret key for OTP
             self.otp_secret = totp
@@ -69,12 +71,12 @@ class CustomUser(AbstractUser):
         return self.otp_secret
 
     def get_otp(self):
-        """Generate OTP using the stored OTP secret."""
+        # Generate OTP using the stored OTP secret.
         totp = pyotp.TOTP(self.otp_secret)
         return totp.now()  # Get current OTP
 
     def verify_otp(self, otp):
-        """Verify if the OTP provided is correct."""
+        # Verify if the OTP provided is correct
         totp = pyotp.TOTP(self.otp_secret)
         return totp.verify(otp)  # Returns True if OTP is valid, False otherwise
 
@@ -96,7 +98,5 @@ class Password(models.Model):
         return self.domain_name
 
     def save(self, *args, **kwargs):
-        """Override save method to hash the password before saving."""
-        # if self.password:
-        #     self.password = make_password(self.password)  # Hash the password
+        # Override save method to hash the password before saving.
         super().save(*args, **kwargs)

@@ -1,19 +1,22 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
-# ✅ Base Directory
+load_dotenv()
+
+# Base Directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ✅ Secret Key (Keep Secure - Use Environment Variable)
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "your-secret-key")  # Update in production
+# Secret Key (Keep Secure -)
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "your-secret-key")
 
-# ✅ Debug Mode - Keep False in Production!
-DEBUG = True  # Change to False in production
+# Debug Mode - Keep False in Production!
+DEBUG = True
 
-# ✅ Allowed Hosts
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]  # Add your production domain if needed
+# Allowed Hosts
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
-# ✅ Installed Apps
+# Installed Apps
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -28,7 +31,7 @@ INSTALLED_APPS = [
     "django_extensions",
 ]
 
-# ✅ Middleware
+# Middleware
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -40,10 +43,10 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# ✅ Root URL Configuration
+# Root URL Configuration
 ROOT_URLCONF = "password_manager.urls"
 
-# ✅ Templates
+# Templates
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -60,25 +63,25 @@ TEMPLATES = [
     },
 ]
 
-# ✅ WSGI Application
+# WSGI Application
 WSGI_APPLICATION = "password_manager.wsgi.application"
 
-# ✅ Database Configuration (PostgreSQL)
+# Database Configuration (PostgreSQL)
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "biometric_auth",  # Change to your DB name
-        "USER": "postgres",  # Change to your PostgreSQL username
-        "PASSWORD": "11212453",  # Change to your PostgreSQL password
-        "HOST": "localhost",
-        "PORT": "5432",
+        "NAME": os.getenv("NAME"),
+        "USER": os.getenv("USER"),
+        "PASSWORD": os.getenv("PASSWORD"),
+        "HOST": os.getenv("HOST"),
+        "PORT": os.getenv("PORT"),
     }
 }
 
-# ✅ Custom User Model
+# Custom User Model
 AUTH_USER_MODEL = "users.CustomUser"
 
-# ✅ Password Validators
+# Password Validators
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
@@ -88,23 +91,23 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-# ✅ Internationalization
+# Internationalization
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# ✅ Static Files
+#  Static Files
 STATIC_URL = "/assets/"
 # IMAGE UPLOAD DIR
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 
-# ✅ Default Primary Key Type
+# Default Primary Key Type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# ✅ Django REST Framework & JWT Authentication
+# Django REST Framework & JWT Authentication
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -153,18 +156,12 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,  # Optional: Configure whether to blacklist the refresh token after rotation
 }
 
+#  Email settings for sending emails through Gmail SMTP server
 
-# settings.py
-
-# Email settings for sending emails through Gmail SMTP server
-EMAIL_BACKEND = (
-    "django.core.mail.backends.smtp.EmailBackend"  # Use SMTP for sending emails
-)
-EMAIL_HOST = "smtp.gmail.com"  # Gmail's SMTP server
-EMAIL_PORT = 587  # Port for sending emails over TLS
-EMAIL_USE_TLS = True  # Enable TLS for encryption during email transmission
-EMAIL_HOST_USER = "bbramadhikari@gmail.com"  # Your Gmail address
-EMAIL_HOST_PASSWORD = (
-    "sjbu texf yxtp fuve"  # Your Gmail password or app-specific password
-)
-DEFAULT_FROM_EMAIL = "bbramadhikari@gmail.com"  # The sender email address
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.getenv("EMAIL_HOST")
+EMAIL_PORT = os.getenv("EMAIL_PORT")
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")

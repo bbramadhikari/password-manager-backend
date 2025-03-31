@@ -193,9 +193,9 @@ def add_password(request):
 #     return Response(serializer.data)
 
 
-@api_view(["GET", "POST"])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def passwords_view(request):
+def verify_otp(request):
     """Allow authenticated users to view or add passwords."""
     if request.method == "GET":
         otp = request.query_params.get("otp")  # Get OTP from query params
@@ -205,22 +205,13 @@ def passwords_view(request):
                 {"error": "OTP is required"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Generate OTP
+        # # Generate OTP
         user = request.user
-        totp = pyotp.TOTP(user.otp_secret, interval=300)  # Use the user's OTP secret
-        generated_otp = totp.now()
-
-        # Send OTP to the user's email address
-        send_mail(
-            "Your OTP for Password Access",
-            f"Your OTP for accessing your passwords is: {generated_otp}",
-            settings.DEFAULT_FROM_EMAIL,  # Sender email from settings
-            [user.email],  # Recipient's email
-            fail_silently=False,
-        )
+        print("OPT", otp, user.otp_generated)
+        totp = pyotp.TOTP(user.otp_secret)  # Use the user's OTP secret
 
         # Now verify OTP entered by the user
-        if not totp.verify(otp):
+        if str(user.otp_generated) != str(otp):
             return Response(
                 {"error": "Invalid OTP"}, status=status.HTTP_400_BAD_REQUEST
             )
@@ -249,6 +240,10 @@ def send_otp_email(request):
         totp = pyotp.TOTP(otp_secret)
         generated_otp = totp.now()  # Generate the OTP
 
+        # Store OTP in the user model (or session for simplicity)
+        user.otp_generated = generated_otp  # Save OTP for comparison later
+        user.save()
+
         # Send the OTP to the user's email
         send_mail(
             "Your OTP for Password Access",
@@ -257,10 +252,6 @@ def send_otp_email(request):
             [user.email],  # Recipient's email
             fail_silently=False,
         )
-
-        # Store OTP in the user model (or session for simplicity)
-        user.otp_generated = generated_otp  # Save OTP for comparison later
-        user.save()
 
         return Response(
             {
@@ -274,27 +265,27 @@ def send_otp_email(request):
         return Response({"error": str(e)}, status=400)
 
 
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def verify_otp(request):
-    """Verify OTP for the logged-in user"""
-    otp = request.query_params.get("otp")  # Get the OTP from query params
+# @api_view(["GET"])
+# @permission_classes([IsAuthenticated])
+# def verify_otp(request):
+#     """Verify OTP for the logged-in user"""
+#     otp = request.query_params.get("otp")  # Get the OTP from query params
 
-    if not otp:
-        return Response({"error": "OTP is required."}, status=400)
+#     if not otp:
+#         return Response({"error": "OTP is required."}, status=400)
 
-    user = request.user  # Get the logged-in user
+#     user = request.user  # Get the logged-in user
 
-    # Verify the OTP with the stored OTP
-    if user.otp_generated == otp:
-        # OTP is correct, fetch passwords for the user
-        passwords = Password.objects.filter(
-            user=user
-        )  # Fetch passwords for authenticated user
-        serializer = PasswordSerializer(passwords, many=True)
-        return Response(serializer.data, status=200)
-    else:
-        return Response({"error": "Invalid OTP."}, status=400)
+#     # Verify the OTP with the stored OTP
+#     if user.otp_generated == otp:
+#         # OTP is correct, fetch passwords for the user
+#         passwords = Password.objects.filter(
+#             user=user
+#         )  # Fetch passwords for authenticated user
+#         serializer = PasswordSerializer(passwords, many=True)
+#         return Response(serializer.data, status=200)
+#     else:
+#         return Response({"error": "Invalid OTP."}, status=400)
 
 
 class ImageUploadView(APIView):
@@ -381,7 +372,7 @@ class VerifyFaceId(APIView):
         if results[0]:
             return Response({"status": True})
 
-        return Response({"status": False})
+        return Response({"status": False, status: 400})
 
     def get_image_path(self, image_path):
         # Assuming image_path is the full path to the image, like '/media/images/your_image.jpg'

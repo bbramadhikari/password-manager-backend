@@ -57,6 +57,7 @@ class CustomUser(AbstractUser):
         related_name="user_face_image",
     )
     otp_secret = models.CharField(max_length=255, blank=True, null=True)
+    otp_generated = models.CharField(max_length=255, blank=True, null=True)
 
     # OTP related methods
     def generate_otp_secret(self):
@@ -96,6 +97,6 @@ class Password(models.Model):
 
     def save(self, *args, **kwargs):
         """Override save method to hash the password before saving."""
-        if self.password:
-            self.password = make_password(self.password)  # Hash the password
+        # if self.password:
+        #     self.password = make_password(self.password)  # Hash the password
         super().save(*args, **kwargs)

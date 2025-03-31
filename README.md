@@ -30,7 +30,7 @@ This is the backend for the **Password Manager Application** built using Django 
 
 1. Clone the repository:
 ```bash
-   git clone https://github.com/your-username/password-manager-backend.git
+   git clone git@github.com:bbramadhikari/password-manager-backend.git
 ```
 
 2. Navigate to the project directory:
@@ -42,6 +42,7 @@ This is the backend for the **Password Manager Application** built using Django 
 ```bash
    python -m venv env
    source env/bin/activate  # On Windows use `.\env\Scripts\activate`
+   cd password-manager
 ```
 
 4. Install dependencies:
